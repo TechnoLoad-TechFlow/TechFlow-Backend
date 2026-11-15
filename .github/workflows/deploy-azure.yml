@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: technoload-platform-u202410728   # Azure App Service name
+  AZURE_WEBAPP_NAME: technoload-website-u202410728   # Azure App Service name
   JAVA_VERSION: '21'
 
 jobs:
