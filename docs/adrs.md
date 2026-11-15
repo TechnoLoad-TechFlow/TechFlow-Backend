@@ -1,6 +1,6 @@
 # Architecture Decision Records
 
-This document records significant architecture decisions for the MaquiControl Platform.
+This document records significant architecture decisions for the TechFlow Backend.
 Each record captures the context, decision, and consequences so that future
 changes can revisit decisions with their original trade-offs in view.
 

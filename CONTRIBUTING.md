@@ -1,4 +1,4 @@
-# Contributing to MaquiControl Platform
+# Contributing to TechFlow Backend
 
 This document lists the conventions this codebase follows.
 
