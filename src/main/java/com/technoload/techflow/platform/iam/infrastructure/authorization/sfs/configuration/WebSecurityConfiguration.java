@@ -71,7 +71,7 @@ public class WebSecurityConfiguration {
                 .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(HttpMethod.POST, "/api/v1/authentication/sign-up", "/api/v1/authentication/sign-in").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/roles", "/health").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/", "/api/v1/roles", "/health").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**",
                                 "/swagger-resources/**", "/webjars/**", "/error").permitAll()

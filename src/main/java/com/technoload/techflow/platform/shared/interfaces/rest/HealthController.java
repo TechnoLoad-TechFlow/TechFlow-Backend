@@ -14,6 +14,17 @@ import java.util.Map;
 @Tag(name = "Health", description = "Liveness check")
 public class HealthController {
 
+    @GetMapping("/")
+    @Operation(summary = "Discover public TechFlow API endpoints")
+    public Map<String, String> index() {
+        return Map.of(
+                "service", "TechFlow Backend",
+                "status", "UP",
+                "documentation", "/swagger-ui/index.html",
+                "health", "/health"
+        );
+    }
+
     @GetMapping("/health")
     @Operation(summary = "Check that the platform is up")
     public Map<String, String> health() {
