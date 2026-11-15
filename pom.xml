@@ -8,11 +8,11 @@
         <version>4.1.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.andesheavytech.maquicontrol</groupId>
+    <groupId>com.technoload.techflow</groupId>
     <artifactId>platform</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <name>maquicontrol-backend</name>
-    <description>MaquiControl Platform is a RESTful API built on Domain-Driven Design (DDD) and CQRS. Developed with Java 21, Spring Boot 4, and MySQL, it manages heavy machinery fleets, rentals, maintenance, field operations, subscriptions, and billing for Peruvian heavy machinery companies.</description>
+    <name>techflow-backend</name>
+    <description>TechFlow Backend is a RESTful API built on Domain-Driven Design (DDD) and CQRS. Developed with Java 21, Spring Boot 4, and MySQL, it manages heavy machinery fleets, rentals, maintenance, field operations, subscriptions, and billing for Peruvian heavy machinery companies.</description>
     <licenses>
         <license>
             <name>MIT License</name>
