@@ -52,6 +52,12 @@ Por defecto el perfil `dev` usa MySQL local (`root` / `password`, base `techflow
 
 Verifica la ejecución en `http://localhost:8080/health`.
 
+También puedes iniciar el API y MySQL para desarrollo local con:
+
+```bash
+docker compose up --build
+```
+
 ## Despliegue
 
 La imagen ejecuta el perfil `prod`, que requiere `JWT_SECRET` y valida el esquema de base de datos en lugar de modificarlo automáticamente.
