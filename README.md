@@ -1,106 +1,75 @@
-# MaquiControl Platform
+# TechFlow Backend
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
 
-## Overview
+API REST de **TechFlow**, la plataforma de TechnoLoad para administrar flotas de maquinaria, alquileres, mantenimiento y operaciones de campo. Está construida con Java 21, Spring Boot, DDD y CQRS.
 
-MaquiControl Platform is the RESTful API behind MaquiControl, the AndesHeavyTech product for Peruvian heavy machinery companies. It is built with Domain-Driven Design and CQRS and organized into bounded contexts that match chapter 4 of the project report: `shared` (the kernel), `iam`, `profiles`, `fleet`, `rental`, `maintenance`, `operations`, `subscription`, and `billing`. Every command outcome is a `Result`, every aggregate stays free of JPA annotations, and every domain event goes through a transactional outbox.
+## Alcance funcional
 
-## Features
+- **IAM y perfiles**: registro, inicio de sesión con JWT, roles, perfiles y organizaciones.
+- **Flota**: categorías, registro de maquinaria y cambios de estado.
+- **Alquileres**: solicitudes, confirmaciones, rechazos y cancelaciones.
+- **Mantenimiento**: mantenimiento preventivo y reportes de averías.
+- **Operaciones**: inicio y cierre de servicios, horas trabajadas y validación.
+- **Suscripciones y facturación**: gestión de planes, suscripciones y comprobantes.
+- **Operación técnica**: health check, documentación OpenAPI y outbox transaccional para eventos de dominio.
 
-- **`/api/v1/authentication`**: sign up and sign in, returning a JWT (`iam`).
-- **`/api/v1/profiles`, `/api/v1/organizations`**: create and update a person's profile and their company (`profiles`).
-- **`/api/v1/machinery`, `/api/v1/categories`**: register, update, change status of, and remove machinery and categories (`fleet`).
-- **`/api/v1/rentals`**: request, confirm, reject, and cancel reservations (`rental`).
-- **`/api/v1/maintenances`, `/api/v1/breakdown-reports`**: schedule maintenance and report breakdowns (`maintenance`).
-- **`/api/v1/service-operations`**: start and complete operations, register and validate worked hours (`operations`).
-- **`/api/v1/subscriptions`**: subscribe to a plan, pay with Mercado Pago, and cancel (`subscription`).
-- **`/api/v1/invoices`**: issue invoices (`billing`).
-- **`/health`**: liveness check.
-- **Interactive API docs**: Swagger UI at `/swagger-ui/index.html`.
+Las rutas principales comienzan en `/api/v1`; la documentación interactiva está disponible en `/swagger-ui/index.html`.
 
-## Technologies
+## Arquitectura
 
-- Java 21 and Spring Boot 4
-- Apache Maven (or the bundled `./mvnw` wrapper)
-- Spring Web, Spring Data JPA (Hibernate) with MySQL
-- Spring Security with JWT (`io.jsonwebtoken`)
-- Spring Validation (Jakarta Bean Validation)
-- SpringDoc OpenAPI 3 / Swagger UI
-- Lombok
-- Docker
+El código se organiza por contextos delimitados: `iam`, `profiles`, `fleet`, `rental`, `maintenance`, `operations`, `subscription`, `billing` y `shared`.
 
-## Prerequisites
+- Los comandos y consultas están separados (CQRS).
+- Los agregados de dominio no dependen de JPA; la persistencia usa entidades y ensambladores paralelos.
+- Los eventos de dominio se guardan en `outbox_events` dentro de la misma transacción y se publican posteriormente.
+- Los errores HTTP usan `ProblemDetail` (RFC 9457).
 
-- Java 21 or higher
-- MySQL 8+ running locally
-- Docker (optional, for the containerized build)
+## Requisitos
 
-## Environment variables
+- Java 21+
+- MySQL 8+
+- Docker (opcional)
 
-| Variable | Description | Default (dev) |
-|---|---|---|
-| `SPRING_PROFILES_ACTIVE` | Active Spring profile | `dev` |
-| `DATABASE_USER` | MySQL username | `root` |
-| `DATABASE_PASSWORD` | MySQL password | `password` |
-| `DATABASE_URL` | MySQL host | `localhost` |
-| `DATABASE_PORT` | MySQL port | `3306` |
-| `DATABASE_NAME` | Database name | `maquicontrol` |
-| `PORT` | Application port | `8080` |
-| `JWT_SECRET` | Secret key for JWT signing | required in `prod` only |
-
-## Spring profiles
-
-| Profile | Usage |
-|---|---|
-| `dev` | Local defaults for every variable above; `ddl-auto=update`; SQL logging on |
-| `prod` | Every variable required from the environment; `ddl-auto=validate`; SQL logging off |
-
-## Architecture notes
-
-- `shared.application.result.Result` and `ApplicationError` model every command outcome without HTTP or domain concepts ([ADR-0001](docs/adrs.md)).
-- Each bounded context splits its application layer into a `*CommandService` and a `*QueryService`, with one Command record per Event Storming command ([ADR-0007](docs/adrs.md)).
-- No aggregate carries a JPA annotation; persistence lives in a parallel `*PersistenceEntity`, `*PersistenceAssembler`, and `*RepositoryImpl` ([ADR-0002](docs/adrs.md)).
-- Domain events are stored in the `outbox_events` table in the same transaction as the aggregate and relayed afterwards by `OutboxEventRelay` ([ADR-0008](docs/adrs.md)).
-
-## Error responses
-
-Every error is an RFC 9457 `ProblemDetail`:
-
-- Validation errors return `400 Bad Request`.
-- A missing resource returns `404 Not Found`.
-- A duplicate or conflicting resource returns `409 Conflict`.
-- A business rule violation (for example, an invalid status transition) returns `422 Unprocessable Entity`.
-
-## Getting Started
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/upc-pre-202620-1asi0729-7750-heavytech/maquicontrol-backend.git
-   cd maquicontrol-backend
-   ```
-2. Set the environment variables listed above.
-3. Build and run:
-   ```bash
-   ./mvnw spring-boot:run
-   ```
-4. Open `http://localhost:8080/health` and `http://localhost:8080/swagger-ui/index.html`.
-
-## Deployment
-
-Build the image with the [Dockerfile](Dockerfile):
+## Configuración local
 
 ```bash
-docker build -t maquicontrol-backend .
-docker run -p 8080:8080 -e DATABASE_URL=... -e DATABASE_NAME=... -e DATABASE_USER=... -e DATABASE_PASSWORD=... -e JWT_SECRET=... maquicontrol-backend
+git clone https://github.com/TechnoLoad-TechFlow/TechFlow-Backend.git
+cd TechFlow-Backend
+export JWT_SECRET='una-clave-local-de-al-menos-32-caracteres'
+./mvnw spring-boot:run
 ```
 
-The image runs with `SPRING_PROFILES_ACTIVE=prod`.
+Por defecto el perfil `dev` usa MySQL local (`root` / `password`, base `techflow`). Ajusta estas variables según corresponda:
 
-## Contributing
+| Variable | Uso |
+|---|---|
+| `DATABASE_URL`, `DATABASE_PORT`, `DATABASE_NAME` | Conexión a MySQL |
+| `DATABASE_USER`, `DATABASE_PASSWORD` | Credenciales de MySQL |
+| `JWT_SECRET` | Clave de firma para los tokens JWT |
+| `CORS_ALLOWED_ORIGINS` | Orígenes web permitidos, separados por coma |
+| `PORT` | Puerto HTTP (por defecto `8080`) |
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md).
+Verifica la ejecución en `http://localhost:8080/health`.
 
-## License
+## Despliegue
 
-MIT, see [`LICENSE.md`](LICENSE.md).
+La imagen ejecuta el perfil `prod`, que requiere `JWT_SECRET` y valida el esquema de base de datos en lugar de modificarlo automáticamente.
+
+```bash
+docker build -t techflow-backend .
+docker run -p 8080:8080 \
+  -e DATABASE_URL=... -e DATABASE_NAME=... \
+  -e DATABASE_USER=... -e DATABASE_PASSWORD=... \
+  -e JWT_SECRET=... \
+  -e CORS_ALLOWED_ORIGINS=https://tu-frontend.example \
+  techflow-backend
+```
+
+## Integraciones pendientes de producción
+
+Los adaptadores de Mercado Pago y SUNAT incluidos son simulaciones de desarrollo. Antes de usarlos para cobros o emisión fiscal reales, deben sustituirse por integraciones verificadas, con credenciales gestionadas de forma segura y pruebas de extremo a extremo.
+
+## Licencia y atribución
+
+Esta adaptación para TechnoLoad se basa en la arquitectura del proyecto público MaquiControl Backend de AndesHeavyTech, distribuido bajo licencia MIT. Se conserva su aviso de copyright en [LICENSE.md](LICENSE.md). Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para colaborar.
