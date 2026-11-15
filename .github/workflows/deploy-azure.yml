@@ -33,13 +33,22 @@ jobs:
           chmod +x mvnw
           ./mvnw -B package -Dtest='!TechFlowBackendApplicationTests' -Dsurefire.failIfNoSpecifiedTests=false
 
+      - name: Upload deployable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: techflow-backend
+          path: target/*.jar
+
   deploy:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Download deployable artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: techflow-backend
+          path: target
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
