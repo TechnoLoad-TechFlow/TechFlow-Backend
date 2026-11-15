@@ -4,7 +4,6 @@ import com.technoload.techflow.platform.iam.interfaces.acl.IamContextFacade;
 import com.technoload.techflow.platform.profiles.application.commandservices.ProfilesManagementCommandService;
 import com.technoload.techflow.platform.profiles.application.queryservices.ProfilesManagementQueryService;
 import com.technoload.techflow.platform.profiles.domain.model.queries.GetProfileByUserAccountIdQuery;
-import com.technoload.techflow.platform.profiles.domain.model.queries.ViewProfileQuery;
 import com.technoload.techflow.platform.profiles.interfaces.rest.resources.CreateProfileResource;
 import com.technoload.techflow.platform.profiles.interfaces.rest.resources.ProfileResource;
 import com.technoload.techflow.platform.profiles.interfaces.rest.resources.UpdateProfileResource;
@@ -95,11 +94,18 @@ public class ProfilesController {
     }
 
     @GetMapping("/{profileId}")
-    @Operation(summary = "Get profile by id")
-    public ResponseEntity<?> getProfileById(@PathVariable Long profileId) {
-        return profilesManagementQueryService.handle(new ViewProfileQuery(profileId))
-                .<ResponseEntity<?>>map(profile -> ResponseEntity.ok(ProfileResourceFromEntityAssembler.toResourceFromEntity(profile)))
+    @Operation(summary = "Get my profile by id", description = "Returns profile data only when the id belongs to the signed-in account.")
+    public ResponseEntity<?> getProfileById(@PathVariable Long profileId, Authentication authentication) {
+        var userAccountId = iamContextFacade.fetchUserAccountIdByEmail(authentication.getName());
+        return profilesManagementQueryService.handle(new GetProfileByUserAccountIdQuery(userAccountId))
+                .<ResponseEntity<?>>map(profile -> {
+                    if (!profile.id().equals(profileId)) {
+                        return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                                ApplicationError.forbidden("Profile", "Profiles belong to their signed-in account."));
+                    }
+                    return ResponseEntity.ok(ProfileResourceFromEntityAssembler.toResourceFromEntity(profile));
+                })
                 .orElseGet(() -> ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
-                        ApplicationError.notFound("Profile", String.valueOf(profileId))));
+                        ApplicationError.notFound("Profile", "signed-in account")));
     }
 }
