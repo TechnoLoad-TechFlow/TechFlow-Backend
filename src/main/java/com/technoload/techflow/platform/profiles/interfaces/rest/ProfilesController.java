@@ -99,7 +99,7 @@ public class ProfilesController {
         var userAccountId = iamContextFacade.fetchUserAccountIdByEmail(authentication.getName());
         return profilesManagementQueryService.handle(new GetProfileByUserAccountIdQuery(userAccountId))
                 .<ResponseEntity<?>>map(profile -> {
-                    if (!profile.id().equals(profileId)) {
+                    if (!profile.getId().equals(profileId)) {
                         return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
                                 ApplicationError.forbidden("Profile", "Profiles belong to their signed-in account."));
                     }
