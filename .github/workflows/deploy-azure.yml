@@ -5,14 +5,16 @@ name: Build and deploy backend to Azure Web App
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: maquicontrol-backend   # Azure App Service name
+  AZURE_WEBAPP_NAME: techflow-backend   # Azure App Service name
   JAVA_VERSION: '21'
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,7 +31,15 @@ jobs:
         # The contextLoads test needs a real MySQL, so it is excluded from CI.
         run: |
           chmod +x mvnw
-          ./mvnw -B package -Dtest='!MaquicontrolBackendApplicationTests' -Dsurefire.failIfNoSpecifiedTests=false
+          ./mvnw -B package -Dtest='!TechFlowBackendApplicationTests' -Dsurefire.failIfNoSpecifiedTests=false
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
